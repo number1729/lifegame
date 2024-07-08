@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ライフゲーム</title>
+    <title>インタラクティブなライフゲーム シミュレーター | オンラインツール</title>
+    <meta name="description" content="ジョン・コンウェイのライフゲームをオンラインで体験。カスタマイズ可能なグリッドで、生命の進化をシミュレート。無料で遊べる教育的なセルオートマトンのウェブアプリ。">
+    <meta name="keywords" content="ライフゲーム, コンウェイ, セル・オートマトン, シミュレーション, 教育ツール">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,11 +34,29 @@
             padding: 5px 10px;
             font-size: 16px;
         }
+        @media (max-width: 600px) {
+            #gameBoard {
+                gap: 0.5px;
+            }
+            .cell {
+                width: 10px;
+                height: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>ライフゲーム</h1>
-    <div>
+    <h1>インタラクティブなライフゲーム シミュレーター</h1>
+    <p>ジョン・コンウェイが考案した「ライフゲーム」をオンラインで体験できます。セルの生死をクリックで切り替え、世代を進めて生命の進化をシミュレートしましょう。</p>
+    <!-- ゲームのコンテンツ -->
+    <h2>ライフゲームとは？</h2>
+    <p>ライフゲームは、簡単なルールに基づいて複雑なパターンを生成する細胞自動機械です。1970年にジョン・コンウェイによって考案され、数学、コンピューター科学、生物学など多くの分野で研究されています。</p>
+    <h2>遊び方</h2>
+    <ol>
+        <li>グリッド上のセルをクリックして、初期状態を設定します。</li>
+        <li>「開始」ボタンを押して、シミュレーションを開始します。</li>
+        <li>「停止」で一時停止、「クリア」でリセット、「ランダム」でランダムな初期状態を生成できます。</li>
+    </ol>
         <button id="startBtn">開始</button>
         <button id="stopBtn">停止</button>
         <button id="clearBtn">クリア</button>
