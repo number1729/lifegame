@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ライフゲーム</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        #gameBoard {
+            display: grid;
+            gap: 1px;
+            background-color: #ccc;
+            border: 1px solid #999;
+            margin: 20px 0;
+        }
+        .cell {
+            width: 15px;
+            height: 15px;
+            background-color: white;
+        }
+        .alive {
+            background-color: black;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ライフゲーム</h1>
+    <div>
+        <button id="startBtn">開始</button>
+        <button id="stopBtn">停止</button>
+        <button id="clearBtn">クリア</button>
+        <button id="randomBtn">ランダム</button>
+    </div>
+    <div id="gameBoard"></div>
+
+    <script>
+        const width = 30;
+        const height = 30;
+        let board = [];
+        let isRunning = false;
+        let intervalId;
+
+        const gameBoard = document.getElementById('gameBoard');
+        gameBoard.style.gridTemplateColumns = `repeat(${width}, 15px)`;
+
+        function createBoard() {
+            for (let i = 0; i < height; i++) {
+                board[i] = [];
+                for (let j = 0; j < width; j++) {
+                    board[i][j] = 0;
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.addEventListener('click', toggleCell);
+                    gameBoard.appendChild(cell);
+                }
+            }
+        }
+
+        function toggleCell(event) {
+            const row = parseInt(event.target.dataset.row);
+            const col = parseInt(event.target.dataset.col);
+            board[row][col] = 1 - board[row][col];
+            event.target.classList.toggle('alive');
+        }
+
+        function updateBoard() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                if (board[row][col] === 1) {
+                    cell.classList.add('alive');
+                } else {
+                    cell.classList.remove('alive');
+                }
+            });
+        }
+
+        function countNeighbors(row, col) {
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    if (i === 0 && j === 0) continue;
+                    const newRow = (row + i + height) % height;
+                    const newCol = (col + j + width) % width;
+                    count += board[newRow][newCol];
+                }
+            }
+            return count;
+        }
+
+        function nextGeneration() {
+            const newBoard = board.map(row => [...row]);
+            for (let i = 0; i < height; i++) {
+                for (let j = 0; j < width; j++) {
+                    const neighbors = countNeighbors(i, j);
+                    if (board[i][j] === 1) {
+                        if (neighbors < 2 || neighbors > 3) {
+                            newBoard[i][j] = 0;
+                        }
+                    } else {
+                        if (neighbors === 3) {
+                            newBoard[i][j] = 1;
+                        }
+                    }
+                }
+            }
+            board = newBoard;
+            updateBoard();
+        }
+
+        function startGame() {
+            if (!isRunning) {
+                isRunning = true;
+                intervalId = setInterval(nextGeneration, 100);
+            }
+        }
+
+        function stopGame() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(intervalId);
+            }
+        }
+
+        function clearBoard() {
+            stopGame();
+            board = board.map(row => row.map(() => 0));
+            updateBoard();
+        }
+
+        function randomizeBoard() {
+            stopGame();
+            board = board.map(row => row.map(() => Math.random() > 0.7 ? 1 : 0));
+            updateBoard();
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('stopBtn').addEventListener('click', stopGame);
+        document.getElementById('clearBtn').addEventListener('click', clearBoard);
+        document.getElementById('randomBtn').addEventListener('click', randomizeBoard);
+
+        createBoard();
+    </script>
+</body>
+</html>
