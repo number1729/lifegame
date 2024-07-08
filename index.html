@@ -8,11 +8,17 @@
     <meta name="keywords" content="ライフゲーム, コンウェイ, セル・オートマトン, シミュレーション, 教育ツール">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             background-color: #f0f0f0;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
         }
         #gameBoard {
             display: grid;
@@ -20,19 +26,109 @@
             background-color: #ccc;
             border: 1px solid #999;
             margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .cell {
             width: 15px;
             height: 15px;
-            background-color: white;
+            background-color: #fff;
+            transition: background-color 0.2s ease;
         }
         .alive {
-            background-color: black;
+            background-color: #3498db;
         }
         button {
             margin: 5px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+        #statusIndicator {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
             padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .running {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .stopped {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        .section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        #tutorialToggle {
+            background-color: #34495e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
             font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #tutorialToggle:hover {
+            background-color: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #tutorialToggle::after {
+            content: '▼';
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+        }
+        #tutorialToggle.active::after {
+            transform: rotate(180deg);
+        }
+        #tutorial {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+            opacity: 0;
+        }
+        #tutorial.show {
+            max-height: 2000px;
+            opacity: 1;
+            transition: max-height 0.5s ease-in, opacity 0.5s ease-in;
+        }
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #speedControl {
+            margin: 10px 0;
+        }
+        #generationCount {
+            font-size: 18px;
+            margin: 10px 0;
         }
         @media (max-width: 600px) {
             #gameBoard {
@@ -42,27 +138,62 @@
                 width: 10px;
                 height: 10px;
             }
+            .section {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>インタラクティブなライフゲーム シミュレーター</h1>
-    <p>ジョン・コンウェイが考案した「ライフゲーム」をオンラインで体験できます。セルの生死をクリックで切り替え、世代を進めて生命の進化をシミュレートしましょう。</p>
-    <!-- ゲームのコンテンツ -->
-    <h2>ライフゲームとは？</h2>
-    <p>ライフゲームは、簡単なルールに基づいて複雑なパターンを生成する細胞自動機械です。1970年にジョン・コンウェイによって考案され、数学、コンピューター科学、生物学など多くの分野で研究されています。</p>
-    <h2>遊び方</h2>
-    <ol>
-        <li>グリッド上のセルをクリックして、初期状態を設定します。</li>
-        <li>「開始」ボタンを押して、シミュレーションを開始します。</li>
-        <li>「停止」で一時停止、「クリア」でリセット、「ランダム」でランダムな初期状態を生成できます。</li>
-    </ol>
+    
+    <button id="tutorialToggle">チュートリアルを表示/非表示</button>
+    
+    <div id="tutorial" class="section">
+        <h2>ライフゲームとは？</h2>
+        <p>ライフゲームは、1970年にジョン・コンウェイによって考案された細胞自動機械です。簡単なルールに基づいて複雑なパターンを生成し、数学、コンピューター科学、生物学など多くの分野で研究されています。</p>
+        
+        <h2>遊び方</h2>
+        <ol>
+            <li>グリッド上のセルをクリックして、初期状態を設定します。</li>
+            <li>「開始」ボタンを押して、シミュレーションを開始します。</li>
+            <li>「停止」で一時停止、「クリア」でリセット、「ランダム」でランダムな初期状態を生成できます。</li>
+            <li>「グライダー」や「宇宙船」ボタンで、有名なパターンを生成できます。</li>
+            <li>シミュレーション速度を調整して、進化のスピードを変更できます。</li>
+        </ol>
+
+        <h2>ルールのカスタマイズ方法</h2>
+        <ol>
+            <li>生存ルール: 生きたセルが生き続けるために必要な隣接する生きたセルの数を指定します。</li>
+            <li>誕生ルール: 死んだセルが生まれ変わるために必要な隣接する生きたセルの数を指定します。</li>
+            <li>例: 生存ルール "23" は、2または3の隣接する生きたセルがある場合に生き続けることを意味します。</li>
+            <li>例: 誕生ルール "3" は、3つの隣接する生きたセルがある場合に新しいセルが生まれることを意味します。</li>
+            <li>ルールを変更した後、「ルールを適用」ボタンをクリックして新しいルールを適用します。</li>
+        </ol>
+    </div>
+
+    <div id="statusIndicator" class="stopped">停止中</div>
+    <div id="generationCount">世代: 0</div>
+    <div id="controls">
         <button id="startBtn">開始</button>
         <button id="stopBtn">停止</button>
         <button id="clearBtn">クリア</button>
         <button id="randomBtn">ランダム</button>
+        <button id="gliderBtn">グライダー</button>
+        <button id="spaceshipBtn">宇宙船</button>
+    </div>
+    <div id="speedControl">
+        <label for="speed">シミュレーション速度:</label>
+        <input type="range" id="speed" min="1" max="20" value="10">
     </div>
     <div id="gameBoard"></div>
+
+    <div id="ruleCustomization" class="section">
+        <h2>ルールのカスタマイズ</h2>
+        <p>生存ルール: <input type="text" id="survivalRule" value="23"></p>
+        <p>誕生ルール: <input type="text" id="birthRule" value="3"></p>
+        <button id="applyRules">ルールを適用</button>
+    </div>
 
     <script>
         const width = 30;
@@ -72,6 +203,7 @@
         let intervalId;
 
         const gameBoard = document.getElementById('gameBoard');
+        const statusIndicator = document.getElementById('statusIndicator');
         gameBoard.style.gridTemplateColumns = `repeat(${width}, 15px)`;
 
         function createBoard() {
@@ -146,6 +278,9 @@
             if (!isRunning) {
                 isRunning = true;
                 intervalId = setInterval(nextGeneration, 100);
+                statusIndicator.textContent = '実行中';
+                statusIndicator.classList.remove('stopped');
+                statusIndicator.classList.add('running');
             }
         }
 
@@ -153,6 +288,9 @@
             if (isRunning) {
                 isRunning = false;
                 clearInterval(intervalId);
+                statusIndicator.textContent = '停止中';
+                statusIndicator.classList.remove('running');
+                statusIndicator.classList.add('stopped');
             }
         }
 
@@ -167,6 +305,13 @@
             board = board.map(row => row.map(() => Math.random() > 0.7 ? 1 : 0));
             updateBoard();
         }
+
+        document.getElementById('tutorialToggle').addEventListener('click', () => {
+            const tutorial = document.getElementById('tutorial');
+            const tutorialToggle = document.getElementById('tutorialToggle');
+            tutorial.classList.toggle('show');
+            tutorialToggle.classList.toggle('active');
+        });
 
         document.getElementById('startBtn').addEventListener('click', startGame);
         document.getElementById('stopBtn').addEventListener('click', stopGame);
