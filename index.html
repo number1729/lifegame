@@ -6,143 +6,9 @@
     <title>インタラクティブなライフゲーム シミュレーター | オンラインツール</title>
     <meta name="description" content="ジョン・コンウェイのライフゲームをオンラインで体験。カスタマイズ可能なグリッドで、生命の進化をシミュレート。無料で遊べる教育的なセルオートマトンのウェブアプリ。">
     <meta name="keywords" content="ライフゲーム, コンウェイ, セル・オートマトン, シミュレーション, 教育ツール">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f0f0f0;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-        }
-        h1, h2, h3 {
-            color: #2c3e50;
-        }
-        #gameBoard {
-            display: grid;
-            gap: 1px;
-            background-color: #ccc;
-            border: 1px solid #999;
-            margin: 20px 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .cell {
-            width: 15px;
-            height: 15px;
-            background-color: #fff;
-            transition: background-color 0.2s ease;
-        }
-        .alive {
-            background-color: #3498db;
-        }
-        button {
-            margin: 5px;
-            padding: 8px 16px;
-            font-size: 14px;
-            background-color: #2980b9;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #3498db;
-        }
-        #statusIndicator {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 10px 0;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .running {
-            background-color: #2ecc71;
-            color: white;
-        }
-        .stopped {
-            background-color: #e74c3c;
-            color: white;
-        }
-        .section {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            width: 100%;
-        }
-        .section h2 {
-            margin-top: 0;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-        #tutorialToggle {
-            background-color: #34495e;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #tutorialToggle:hover {
-            background-color: #2c3e50;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        #tutorialToggle::after {
-            content: '▼';
-            margin-left: 10px;
-            transition: transform 0.3s ease;
-        }
-        #tutorialToggle.active::after {
-            transform: rotate(180deg);
-        }
-        #tutorial {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
-            opacity: 0;
-        }
-        #tutorial.show {
-            max-height: 2000px;
-            opacity: 1;
-            transition: max-height 0.5s ease-in, opacity 0.5s ease-in;
-        }
-        #controls {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        #speedControl {
-            margin: 10px 0;
-        }
-        #generationCount {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        @media (max-width: 600px) {
-            #gameBoard {
-                gap: 0.5px;
-            }
-            .cell {
-                width: 10px;
-                height: 10px;
-            }
-            .section {
-                padding: 15px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
 </head>
 <body>
     <h1>インタラクティブなライフゲーム シミュレーター</h1>
@@ -182,6 +48,10 @@
         <button id="gliderBtn">グライダー</button>
         <button id="spaceshipBtn">宇宙船</button>
     </div>
+    <div id="sizeOfGrid" class="section">
+        <h4>グリッドのサイズ</h4>
+        <p>幅: <input type="number" id="width" value="30" min="10" max="100"> x 高さ: <input type="number" id="height" value="30" min="10" max="100"></p>
+        <button id="applySize">サイズを適用</button>
     <div id="speedControl">
         <label for="speed">シミュレーション速度:</label>
         <input type="range" id="speed" min="1" max="20" value="10">
@@ -190,135 +60,16 @@
 
     <div id="ruleCustomization" class="section">
         <h2>ルールのカスタマイズ</h2>
-        <p>生存ルール: <input type="text" id="survivalRule" value="23"></p>
-        <p>誕生ルール: <input type="text" id="birthRule" value="3"></p>
+
+        <p>生存ルール:</p>
+        <div id="survivalRule"></div>
+
+        <p>誕生ルール:</p>
+        <div id="birthRule"></div>
+
         <button id="applyRules">ルールを適用</button>
     </div>
+    <script src="script.js"></script>
 
-    <script>
-        const width = 30;
-        const height = 30;
-        let board = [];
-        let isRunning = false;
-        let intervalId;
-
-        const gameBoard = document.getElementById('gameBoard');
-        const statusIndicator = document.getElementById('statusIndicator');
-        gameBoard.style.gridTemplateColumns = `repeat(${width}, 15px)`;
-
-        function createBoard() {
-            for (let i = 0; i < height; i++) {
-                board[i] = [];
-                for (let j = 0; j < width; j++) {
-                    board[i][j] = 0;
-                    const cell = document.createElement('div');
-                    cell.classList.add('cell');
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
-                    cell.addEventListener('click', toggleCell);
-                    gameBoard.appendChild(cell);
-                }
-            }
-        }
-
-        function toggleCell(event) {
-            const row = parseInt(event.target.dataset.row);
-            const col = parseInt(event.target.dataset.col);
-            board[row][col] = 1 - board[row][col];
-            event.target.classList.toggle('alive');
-        }
-
-        function updateBoard() {
-            const cells = document.querySelectorAll('.cell');
-            cells.forEach(cell => {
-                const row = parseInt(cell.dataset.row);
-                const col = parseInt(cell.dataset.col);
-                if (board[row][col] === 1) {
-                    cell.classList.add('alive');
-                } else {
-                    cell.classList.remove('alive');
-                }
-            });
-        }
-
-        function countNeighbors(row, col) {
-            let count = 0;
-            for (let i = -1; i <= 1; i++) {
-                for (let j = -1; j <= 1; j++) {
-                    if (i === 0 && j === 0) continue;
-                    const newRow = (row + i + height) % height;
-                    const newCol = (col + j + width) % width;
-                    count += board[newRow][newCol];
-                }
-            }
-            return count;
-        }
-
-        function nextGeneration() {
-            const newBoard = board.map(row => [...row]);
-            for (let i = 0; i < height; i++) {
-                for (let j = 0; j < width; j++) {
-                    const neighbors = countNeighbors(i, j);
-                    if (board[i][j] === 1) {
-                        if (neighbors < 2 || neighbors > 3) {
-                            newBoard[i][j] = 0;
-                        }
-                    } else {
-                        if (neighbors === 3) {
-                            newBoard[i][j] = 1;
-                        }
-                    }
-                }
-            }
-            board = newBoard;
-            updateBoard();
-        }
-
-        function startGame() {
-            if (!isRunning) {
-                isRunning = true;
-                intervalId = setInterval(nextGeneration, 100);
-                statusIndicator.textContent = '実行中';
-                statusIndicator.classList.remove('stopped');
-                statusIndicator.classList.add('running');
-            }
-        }
-
-        function stopGame() {
-            if (isRunning) {
-                isRunning = false;
-                clearInterval(intervalId);
-                statusIndicator.textContent = '停止中';
-                statusIndicator.classList.remove('running');
-                statusIndicator.classList.add('stopped');
-            }
-        }
-
-        function clearBoard() {
-            stopGame();
-            board = board.map(row => row.map(() => 0));
-            updateBoard();
-        }
-
-        function randomizeBoard() {
-            stopGame();
-            board = board.map(row => row.map(() => Math.random() > 0.7 ? 1 : 0));
-            updateBoard();
-        }
-
-        document.getElementById('tutorialToggle').addEventListener('click', () => {
-            const tutorial = document.getElementById('tutorial');
-            const tutorialToggle = document.getElementById('tutorialToggle');
-            tutorial.classList.toggle('show');
-            tutorialToggle.classList.toggle('active');
-        });
-
-        document.getElementById('startBtn').addEventListener('click', startGame);
-        document.getElementById('stopBtn').addEventListener('click', stopGame);
-        document.getElementById('clearBtn').addEventListener('click', clearBoard);
-        document.getElementById('randomBtn').addEventListener('click', randomizeBoard);
-
-        createBoard();
-    </script>
 </body>
 </html>
